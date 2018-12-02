@@ -26,7 +26,25 @@ defmodule Advent.Day2 do
 
   Your puzzle answer was 7410.
 
-  The first half of this puzzle is complete! It provides one gold star: *
+  --- Part Two ---
+  Confident that your list of box IDs is complete, you're ready to find the boxes full of prototype fabric.
+
+  The boxes will have IDs which differ by exactly one character at the same position in both strings. For example, given the following box IDs:
+
+  abcde
+  fghij
+  klmno
+  pqrst
+  fguij
+  axcye
+  wvxyz
+  The IDs abcde and axcye are close, but they differ by two characters (the second and fourth). However, the IDs fghij and fguij differ by exactly one character, the third (h and u). Those must be the correct boxes.
+
+  What letters are common between the two correct box IDs? (In the example above, this is found by removing the differing character from either ID, producing fgij.)
+
+  Your puzzle answer was cnjxoritzhvbosyewrmqhgkul.
+
+  Both parts of this puzzle are complete! They provide two gold stars: **
   """
 
   @doc """
@@ -51,6 +69,31 @@ defmodule Advent.Day2 do
     count_3 = Enum.count(counts, &(3 in &1))
     count_2 * count_3
   end
+
+  @doc """
+  Returns the common letters of the two ids that only differ by one letter
+  """
+  @spec common(String.t()) :: String.t()
+  def common(input) do
+    ids = input |> parse()
+
+    for id1 <- ids, id2 <- ids, id1 != id2 do
+      {id1, id2}
+    end
+    |> Enum.reduce_while(nil, fn {id1, id2}, _ ->
+      common = find_common(id1, id2, 0, "")
+
+      case common do
+        nil -> {:cont, nil}
+        some -> {:halt, some}
+      end
+    end)
+  end
+
+  defp find_common(<<a, r1::binary>>, <<a, r2::binary>>, f, acc), do: find_common(r1, r2, f, acc <> <<a>>)
+  defp find_common(<<_, r1::binary>>, <<_, r2::binary>>, 0, acc), do: find_common(r1, r2, 1, acc)
+  defp find_common(<<>>, <<>>, _f, acc), do: acc
+  defp find_common(_, _, 1, _acc), do: nil
 
   defp parse(input) do
     input
