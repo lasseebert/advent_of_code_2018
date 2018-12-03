@@ -61,7 +61,7 @@ defmodule Advent.Day1 do
   def final_frequency(input) do
     input
     |> parse()
-    |> Enum.reduce(&Kernel.+/2)
+    |> Enum.reduce(&+/2)
   end
 
   @doc """
@@ -71,13 +71,12 @@ defmodule Advent.Day1 do
     input
     |> parse()
     |> Stream.cycle()
-    |> Enum.reduce_while({0, MapSet.new([0])}, fn freq, {acc, map} ->
-      new_acc = acc + freq
-
-      if MapSet.member?(map, new_acc) do
-        {:halt, new_acc}
+    |> Stream.scan(0, &+/2)
+    |> Enum.reduce_while(MapSet.new([0]), fn freq, map ->
+      if MapSet.member?(map, freq) do
+        {:halt, freq}
       else
-        {:cont, {new_acc, MapSet.put(map, new_acc)}}
+        {:cont, MapSet.put(map, freq)}
       end
     end)
   end
