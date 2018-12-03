@@ -40,6 +40,13 @@ defmodule Advent.Day3 do
   The four square inches marked with X are claimed by both 1 and 2. (Claim 3, while adjacent to the others, does not overlap either of them.)
 
   If the Elves all proceed with their own plans, none of them will have enough fabric. How many square inches of fabric are within two or more claims?
+
+  --- Part Two ---
+  Amidst the chaos, you notice that exactly one claim doesn't overlap by even a single square inch of fabric with any other claim. If you can somehow draw attention to it, maybe the Elves will be able to make Santa's suit after all!
+
+  For example, in the claims above, only claim 3 is intact after all claims are made.
+
+  What is the ID of the only claim that doesn't overlap?
   """
 
   @doc """
@@ -54,22 +61,46 @@ defmodule Advent.Day3 do
     |> Enum.count(&(&1 > 1))
   end
 
-  defp add_square_to_map({dx, dy, w, h}, map) do
+  @doc """
+  Returns the claim with no overlapping
+  """
+  @spec find_no_overlap(String.t()) :: integer
+  def find_no_overlap(input) do
+    claims = parse(input)
+    map = Enum.reduce(claims, %{}, &add_square_to_map/2)
+    {id, _, _, _, _} = Enum.find(claims, &(not overlapping?(&1, map)))
+
+    id
+  end
+
+  defp add_square_to_map(claim, map) do
+    claim
+    |> squares()
+    |> Enum.reduce(map, &Map.update(&2, &1, 1, fn c -> c + 1 end))
+  end
+
+  defp overlapping?(claim, map) do
+    claim
+    |> squares()
+    |> Enum.any?(&(Map.get(map, &1) > 1))
+  end
+
+  defp squares({_id, dx, dy, w, h}) do
     for x <- dx..(dx + w - 1), y <- dy..(dy + h - 1) do
       {x, y}
     end
-    |> Enum.reduce(map, &Map.update(&2, &1, 1, fn c -> c + 1 end))
   end
 
   defp parse(input) do
     input
     |> String.split("\n", trim: true)
     |> Enum.map(fn line ->
-      [x, y, w, h] =
-        ~r/^#\d+ @ (\d+),(\d+): (\d+)x(\d+)$/
+      [id, x, y, w, h] =
+        ~r/^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$/
         |> Regex.run(line, capture: :all_but_first)
 
       {
+        String.to_integer(id),
         String.to_integer(x),
         String.to_integer(y),
         String.to_integer(w),
