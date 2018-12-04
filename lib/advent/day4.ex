@@ -49,6 +49,13 @@ defmodule Advent.Day4 do
   While this example listed the entries in chronological order, your entries are in the order you found them. You'll need to organize them before they can be analyzed.
 
   What is the ID of the guard you chose multiplied by the minute you chose? (In the above example, the answer would be 10 * 24 = 240.)
+
+  --- Part Two ---
+  Strategy 2: Of all guards, which guard is most frequently asleep on the same minute?
+
+  In the example above, Guard #99 spent minute 45 asleep more than any other guard or minute - three times in total. (In all other cases, any guard spent any minute asleep at most twice.)
+
+  What is the ID of the guard you chose multiplied by the minute you chose? (In the above example, the answer would be 99 * 45 = 4455.)
   """
 
   @doc """
@@ -60,6 +67,24 @@ defmodule Advent.Day4 do
       input
       |> parse()
       |> Enum.max_by(fn {_id, id_map} -> id_map |> Map.values() |> Enum.sum() end)
+
+    minute =
+      best_guard_map
+      |> Enum.max_by(fn {_min, count} -> count end)
+      |> elem(0)
+
+    id * minute
+  end
+
+  @doc """
+  Returns the Strategy2 checksum
+  """
+  @spec strategy_2(String.t()) :: integer
+  def strategy_2(input) do
+    {id, best_guard_map} =
+      input
+      |> parse()
+      |> Enum.max_by(fn {_id, id_map} -> id_map |> Map.values() |> Enum.max() end)
 
     minute =
       best_guard_map
