@@ -59,21 +59,11 @@ defmodule Advent.Day4 do
   """
 
   @doc """
-  As described in the puzzle text, finds the best guard multiplied by the best minute
+  Returns the Strategy1 checksum
   """
   @spec strategy_1(String.t()) :: integer
   def strategy_1(input) do
-    {id, best_guard_map} =
-      input
-      |> parse()
-      |> Enum.max_by(fn {_id, id_map} -> id_map |> Map.values() |> Enum.sum() end)
-
-    minute =
-      best_guard_map
-      |> Enum.max_by(fn {_min, count} -> count end)
-      |> elem(0)
-
-    id * minute
+    strategy(input, &Enum.sum/1)
   end
 
   @doc """
@@ -81,14 +71,18 @@ defmodule Advent.Day4 do
   """
   @spec strategy_2(String.t()) :: integer
   def strategy_2(input) do
+    strategy(input, &Enum.max/1)
+  end
+
+  defp strategy(input, value_fun) do
     {id, best_guard_map} =
       input
       |> parse()
-      |> Enum.max_by(fn {_id, id_map} -> id_map |> Map.values() |> Enum.max() end)
+      |> Enum.max_by(fn {_id, id_map} -> id_map |> Map.values() |> value_fun.() end)
 
     minute =
       best_guard_map
-      |> Enum.max_by(fn {_min, count} -> count end)
+      |> Enum.max_by(fn {_min, sleeps} -> sleeps end)
       |> elem(0)
 
     id * minute
