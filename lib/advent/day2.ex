@@ -75,19 +75,21 @@ defmodule Advent.Day2 do
   """
   @spec common(String.t()) :: String.t()
   def common(input) do
-    ids = input |> parse()
-
-    for id1 <- ids, id2 <- ids, id1 != id2 do
-      {id1, id2}
-    end
+    input
+    |> parse()
+    |> id_combinations()
     |> Enum.reduce_while(nil, fn {id1, id2}, _ ->
-      common = find_common(id1, id2, 0, "")
-
-      case common do
+      case find_common(id1, id2, 0, "") do
         nil -> {:cont, nil}
         some -> {:halt, some}
       end
     end)
+  end
+
+  defp id_combinations(ids) do
+    for id1 <- ids, id2 <- ids, id1 < id2 do
+      {id1, id2}
+    end
   end
 
   defp find_common(<<a, r1::binary>>, <<a, r2::binary>>, f, acc), do: find_common(r1, r2, f, acc <> <<a>>)
