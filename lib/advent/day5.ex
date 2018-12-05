@@ -69,15 +69,12 @@ defmodule Advent.Day5 do
   end
 
   for {down, up} <- @pairs do
-    defp react([unquote(down), unquote(up) | rest], head), do: remove_pair(rest, head)
-    defp react([unquote(up), unquote(down) | rest], head), do: remove_pair(rest, head)
+    defp react([unquote(down) | rest], [unquote(up) | stack]), do: react(rest, stack)
+    defp react([unquote(up) | rest], [unquote(down) | stack]), do: react(rest, stack)
   end
 
-  defp react([a | rest], head), do: react(rest, [a | head])
-  defp react([], head), do: Enum.reverse(head)
-
-  defp remove_pair(rest, [first | head]), do: react([first | rest], head)
-  defp remove_pair(rest, []), do: react(rest, [])
+  defp react([a | rest], stack), do: react(rest, [a | stack])
+  defp react([], stack), do: Enum.reverse(stack)
 
   defp parse(input) do
     input
