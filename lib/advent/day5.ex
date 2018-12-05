@@ -22,6 +22,21 @@ defmodule Advent.Day5 do
   After all possible reactions, the resulting polymer contains 10 units.
 
   How many units remain after fully reacting the polymer you scanned? (Note: in this puzzle and others, the input is large; if you copy/paste your input, make sure you get the whole thing.)
+
+  --- Part Two ---
+  Time to improve the polymer.
+
+  One of the unit types is causing problems; it's preventing the polymer from collapsing as much as it should. Your goal is to figure out which unit type is causing the most problems, remove all instances of it (regardless of polarity), fully react the remaining polymer, and measure its length.
+
+  For example, again using the polymer dabAcCaCBAcCcaDA from above:
+
+  Removing all A/a units produces dbcCCBcCcD. Fully reacting this polymer produces dbCBcD, which has length 6.
+  Removing all B/b units produces daAcCaCAcCcaDA. Fully reacting this polymer produces daCAcaDA, which has length 8.
+  Removing all C/c units produces dabAaBAaDA. Fully reacting this polymer produces daDA, which has length 4.
+  Removing all D/d units produces abAcCaCBAcCcaA. Fully reacting this polymer produces abCBAc, which has length 6.
+  In this example, removing all C/c units was best, producing the answer 4.
+
+  What is the length of the shortest polymer you can produce by removing all units of exactly one type and fully reacting the result?
   """
 
   @pairs ?a..?z
@@ -35,6 +50,19 @@ defmodule Advent.Day5 do
     |> parse()
     |> react([])
     |> length
+  end
+
+  @doc "Part 2"
+  @spec remaining_length_after_removal(String.t()) :: integer
+  def remaining_length_after_removal(input) do
+    polymer = parse(input)
+
+    @pairs
+    |> Enum.map(fn {down, up} ->
+      polymer = polymer |> Enum.reject(&(&1 in [down, up]))
+      polymer |> react([]) |> length
+    end)
+    |> Enum.min()
   end
 
   for {down, up} <- @pairs do
