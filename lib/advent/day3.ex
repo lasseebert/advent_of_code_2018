@@ -49,6 +49,9 @@ defmodule Advent.Day3 do
   What is the ID of the only claim that doesn't overlap?
   """
 
+  # Max fabric size
+  @max 1000
+
   @doc """
   Finds number of square inches that has at least two claims
   """
@@ -87,7 +90,7 @@ defmodule Advent.Day3 do
 
   defp squares({_id, dx, dy, w, h}) do
     for x <- dx..(dx + w - 1), y <- dy..(dy + h - 1) do
-      {x, y}
+      x * @max + y
     end
   end
 
