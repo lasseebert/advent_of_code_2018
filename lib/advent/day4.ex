@@ -145,7 +145,7 @@ defmodule Advent.Day4 do
     start..(stop - 1)
     |> Enum.reduce(map, fn minute, map ->
       Map.update(map, id, %{minute => 1}, fn id_map ->
-        Map.update(id_map, minute, 1, fn sleeps -> sleeps + 1 end)
+        Map.update(id_map, minute, 1, &(&1 + 1))
       end)
     end)
     |> add_chunk_to_map([{:begin, id} | actions])

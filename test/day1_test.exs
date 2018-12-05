@@ -72,7 +72,7 @@ defmodule Advent.Day1Test do
         |> File.read!()
         |> Day1.first_duplicate()
 
-      assert result == 69285
+      assert result == 69_285
     end
   end
 end

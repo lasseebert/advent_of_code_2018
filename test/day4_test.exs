@@ -31,7 +31,7 @@ defmodule Advent.Day4Test do
     end
 
     test "puzzle input" do
-      assert "inputs/day4_1.txt" |> File.read!() |> Day4.strategy_1() == 12169
+      assert "inputs/day4_1.txt" |> File.read!() |> Day4.strategy_1() == 12_169
     end
   end
 
@@ -41,7 +41,7 @@ defmodule Advent.Day4Test do
     end
 
     test "puzzle input" do
-      assert "inputs/day4_1.txt" |> File.read!() |> Day4.strategy_2() == 16164
+      assert "inputs/day4_1.txt" |> File.read!() |> Day4.strategy_2() == 16_164
     end
   end
 end
