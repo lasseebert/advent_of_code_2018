@@ -59,9 +59,12 @@ defmodule Advent.Day5 do
 
     @pairs
     |> Enum.map(fn {down, up} ->
-      polymer = polymer |> Enum.reject(&(&1 in [down, up]))
-      polymer |> react([]) |> length
+      Task.async(fn ->
+        polymer = polymer |> Enum.reject(&(&1 in [down, up]))
+        polymer |> react([]) |> length
+      end)
     end)
+    |> Enum.map(&Task.await/1)
     |> Enum.min()
   end
 
