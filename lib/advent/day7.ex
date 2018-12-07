@@ -72,6 +72,13 @@ defmodule Advent.Day7 do
   """
 
   defmodule Graph do
+    @moduledoc """
+    Represents a dependency graph with:
+    - A map of blockers (a blocks b)
+    - A map of depends (a depends on b)
+    - A list of nodes ready to be processed. This is all those that does not depende on any.
+    """
+
     defstruct [:ready, :blocks, :depends]
 
     def new(block_list) do
@@ -95,12 +102,14 @@ defmodule Advent.Day7 do
       %__MODULE__{ready: ready, blocks: blocks, depends: depends}
     end
 
+    @doc "Steps the graph with the first ready node"
     def step(%{ready: ready} = graph) do
       first = ready |> Enum.sort() |> hd
       graph = step(graph, first)
       {graph, first}
     end
 
+    @doc "Steps the graph with the given node"
     def step(%{ready: ready, depends: depends, blocks: blocks} = graph, node) do
       ready = List.delete(ready, node)
 
