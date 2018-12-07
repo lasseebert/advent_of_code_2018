@@ -1,9 +1,9 @@
-defmodule Advent.Day6Test do
+defmodule Advent.Day6Part2Test do
   use ExUnit.Case
 
-  alias Advent.Day6
+  alias Advent.Day6Part2
 
-  describe "part 1" do
+  describe "part 2" do
     test "example input" do
       input = """
       1, 1
@@ -14,12 +14,12 @@ defmodule Advent.Day6Test do
       8, 9
       """
 
-      assert Day6.largest_area(input) == 17
+      assert Day6Part2.area_size(input, 32) == 16
     end
 
     test "puzzle input" do
       input = "inputs/day6_1.txt" |> File.read!()
-      assert Day6.largest_area(input) == 5_941
+      assert Day6Part2.area_size(input, 10_000) == 40_244
     end
   end
 end

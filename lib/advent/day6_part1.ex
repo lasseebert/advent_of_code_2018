@@ -1,4 +1,4 @@
-defmodule Advent.Day6 do
+defmodule Advent.Day6Part1 do
   @moduledoc """
   --- Day 6: Chronal Coordinates ---
   The device on your wrist beeps several times, and once again you feel like you're falling.
