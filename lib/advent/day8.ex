@@ -56,11 +56,11 @@ defmodule Advent.Day8 do
     A recursive tree structure
     """
 
-    defstruct [:children, :meta, :id]
+    defstruct [:children, :meta]
 
     @doc "Builds a tree from the values"
     def build(values) do
-      {node, [], _id} = _build(values, 1)
+      {node, []} = _build(values)
       node
     end
 
@@ -72,65 +72,37 @@ defmodule Advent.Day8 do
     end
 
     @doc "Returns the value of this node as described in the puzzle text"
-    def value(tree) do
-      {value, _cache} = _value(tree, %{})
-      value
+    def value(%{children: []} = node) do
+      Enum.sum(node.meta)
     end
 
-    defp _value(node, cache) do
-      cache_value = Map.get(cache, node.id)
-
-      if cache_value do
-        {cache_value, cache}
-      else
-        calc_value(node, cache)
-      end
-    end
-
-    defp calc_value(%{children: []} = node, cache) do
-      value = Enum.sum(node.meta)
-      cache = Map.put(cache, node.id, value)
-      {value, cache}
-    end
-
-    defp calc_value(node, cache) do
+    def value(node) do
       num_children = length(node.children)
-      child_map = node.children |> Enum.with_index() |> Enum.into(%{}, fn {node, index} -> {index + 1, node} end)
 
-      {value, cache} =
-        node.meta
-        |> Enum.reduce({0, cache}, fn meta, {acc, cache} ->
-          case meta do
-            0 ->
-              {acc, cache}
-
-            n when n > num_children ->
-              {acc, cache}
-
-            index ->
-              child = Map.fetch!(child_map, index)
-              {child_value, cache} = _value(child, cache)
-              {acc + child_value, cache}
-          end
-        end)
-
-      cache = Map.put(cache, node.id, value)
-      {value, cache}
+      node.meta
+      |> Enum.map(fn meta_value ->
+        case meta_value do
+          0 -> 0
+          n when n > num_children -> 0
+          index -> node.children |> Enum.at(index - 1) |> value()
+        end
+      end)
+      |> Enum.sum()
     end
 
-    def _build([num_children, num_meta | rest], id) do
-      {children, rest, next_id} = build_children(num_children, [], rest, id + 1)
+    def _build([num_children, num_meta | rest]) do
+      {children, rest} = build_children(num_children, [], rest)
       {meta, rest} = Enum.split(rest, num_meta)
 
-      node = %__MODULE__{children: children, meta: meta, id: id}
-      {node, rest, next_id}
+      node = %__MODULE__{children: children, meta: meta}
+      {node, rest}
     end
 
-    defp build_children(0, acc, rest, next_id), do: {Enum.reverse(acc), rest, next_id}
+    defp build_children(0, acc, rest), do: {Enum.reverse(acc), rest}
 
-    defp build_children(n, acc, rest, next_id) do
-      {child, rest, next_id} = _build(rest, next_id)
-      build_children(n - 1, [child | acc], rest, next_id)
+    defp build_children(n, acc, rest) do
+      {child, rest} = _build(rest)
+      build_children(n - 1, [child | acc], rest)
     end
   end
 
