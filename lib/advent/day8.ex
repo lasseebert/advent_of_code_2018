@@ -31,6 +31,24 @@ defmodule Advent.Day8 do
   The first check done on the license file is to simply add up all of the metadata entries. In this example, that sum is 1+1+2+10+11+12+2+99=138.
 
   What is the sum of all metadata entries?
+
+  --- Part Two ---
+  The second check is slightly more complicated: you need to find the value of the root node (A in the example above).
+
+  The value of a node depends on whether it has child nodes.
+
+  If a node has no child nodes, its value is the sum of its metadata entries. So, the value of node B is 10+11+12=33, and the value of node D is 99.
+
+  However, if a node does have child nodes, the metadata entries become indexes which refer to those child nodes. A metadata entry of 1 refers to the first child node, 2 to the second, 3 to the third, and so on. The value of this node is the sum of the values of the child nodes referenced by the metadata entries. If a referenced child node does not exist, that reference is skipped. A child node can be referenced multiple time and counts each time it is referenced. A metadata entry of 0 does not refer to any child node.
+
+  For example, again using the above nodes:
+
+  Node C has one metadata entry, 2. Because node C has only one child node, 2 references a child node which does not exist, and so the value of node C is 0.
+  Node A has three metadata entries: 1, 1, and 2. The 1 references node A's first child node, B, and the 2 references node A's second child node, C. Because node B has a value of 33 and node C has a value of 0, the value of node A is 33+33+0=66.
+  So, in this example, the value of the root node is 66.
+
+  What is the value of the root node?
+
   """
 
   defmodule Tree do
@@ -38,11 +56,11 @@ defmodule Advent.Day8 do
     A recursive tree structure
     """
 
-    defstruct [:children, :meta]
+    defstruct [:children, :meta, :id]
 
     @doc "Builds a tree from the values"
     def build(values) do
-      {node, []} = _build(values)
+      {node, [], _id} = _build(values, 1)
       node
     end
 
@@ -53,19 +71,66 @@ defmodule Advent.Day8 do
       children_sum + own_sum
     end
 
-    def _build([num_children, num_meta | rest]) do
-      {children, rest} = build_children(num_children, [], rest)
-      {meta, rest} = Enum.split(rest, num_meta)
-
-      node = %__MODULE__{children: children, meta: meta}
-      {node, rest}
+    @doc "Returns the value of this node as described in the puzzle text"
+    def value(tree) do
+      {value, _cache} = _value(tree, %{})
+      value
     end
 
-    defp build_children(0, acc, rest), do: {acc, rest}
+    defp _value(node, cache) do
+      cache_value = Map.get(cache, node.id)
 
-    defp build_children(n, acc, rest) do
-      {child, rest} = _build(rest)
-      build_children(n - 1, [child | acc], rest)
+      if cache_value do
+        {cache_value, cache}
+      else
+        calc_value(node, cache)
+      end
+    end
+
+    defp calc_value(%{children: []} = node, cache) do
+      value = Enum.sum(node.meta)
+      cache = Map.put(cache, node.id, value)
+      {value, cache}
+    end
+
+    defp calc_value(node, cache) do
+      num_children = length(node.children)
+      child_map = node.children |> Enum.with_index() |> Enum.into(%{}, fn {node, index} -> {index + 1, node} end)
+
+      {value, cache} =
+        node.meta
+        |> Enum.reduce({0, cache}, fn meta, {acc, cache} ->
+          case meta do
+            0 ->
+              {acc, cache}
+
+            n when n > num_children ->
+              {acc, cache}
+
+            index ->
+              child = Map.fetch!(child_map, index)
+              {child_value, cache} = _value(child, cache)
+              {acc + child_value, cache}
+          end
+        end)
+
+      cache = Map.put(cache, node.id, value)
+      {value, cache}
+    end
+
+    def _build([num_children, num_meta | rest], id) do
+      {children, rest, next_id} = build_children(num_children, [], rest, id + 1)
+      {meta, rest} = Enum.split(rest, num_meta)
+
+      node = %__MODULE__{children: children, meta: meta, id: id}
+      {node, rest, next_id}
+    end
+
+    defp build_children(0, acc, rest, next_id), do: {Enum.reverse(acc), rest, next_id}
+
+    defp build_children(n, acc, rest, next_id) do
+      {child, rest, next_id} = _build(rest, next_id)
+      build_children(n - 1, [child | acc], rest, next_id)
     end
   end
 
@@ -75,6 +140,14 @@ defmodule Advent.Day8 do
     input
     |> parse()
     |> Tree.sum_meta()
+  end
+
+  @doc "Part 2"
+  @spec root_value(String.t()) :: integer
+  def root_value(input) do
+    input
+    |> parse()
+    |> Tree.value()
   end
 
   defp parse(input) do
