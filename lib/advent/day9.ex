@@ -58,90 +58,49 @@ defmodule Advent.Day9 do
 
   defmodule Circle do
     @moduledoc """
-    A circular doubly linked list implemented with a map of {node, cw, ccw} plus a pointer to current node.
+    A double-linked circlular list implemented with a zipper.
+    Everything is O(1) except when the pointer needs to wrap from start to end or vice versa, then it is O(n)
 
-    This ensures around O(1) (map lookup) time for all operations:
-    - Get current node
-    - Rotate
-    - Add
-    - Remove
+    This is much quicker than using a map for true circular-ness (6x speedup on my machine)
     """
 
-    @type t :: {map, any}
-
-    @doc "Builds a new Circle with a single current node"
-    @spec new(any) :: t
-    def new(current) do
-      {%{current => {current, current, current}}, current}
+    def new(value) do
+      {[], value, []}
     end
 
-    @doc "Returns the current node"
-    @spec current(t) :: any
-    def current({_map, pointer}), do: pointer
+    def current({_, current, _}), do: current
 
-    @doc "Changes the current node clockwise"
-    @spec rotate_cw(t) :: t
-    def rotate_cw({map, pointer}) do
-      pointer = map |> Map.fetch!(pointer) |> elem(1)
-      {map, pointer}
+    def rotate_cw({left, current, []}) do
+      [new_current | right] = Enum.reverse([current | left])
+      {[], new_current, right}
     end
 
-    @doc "Changes the current node counter-clockwise"
-    @spec rotate_ccw(t) :: t
-    def rotate_ccw({map, pointer}) do
-      pointer = map |> Map.fetch!(pointer) |> elem(2)
-      {map, pointer}
+    def rotate_cw({left, current, [right_first | right]}) do
+      {[current | left], right_first, right}
     end
 
-    @doc "Rotates n times"
-    @spec rotate_ccw(t, non_neg_integer) :: t
+    def rotate_ccw({[], current, right}) do
+      [new_current | left] = Enum.reverse([current | right])
+      {left, new_current, []}
+    end
+
+    def rotate_ccw({[left_first | left], current, right}) do
+      {left, left_first, [current | right]}
+    end
+
     def rotate_ccw(circle, 0), do: circle
-    def rotate_ccw(circle, n) when n > 0, do: circle |> rotate_ccw() |> rotate_ccw(n - 1)
+    def rotate_ccw(circle, n), do: circle |> rotate_ccw() |> rotate_ccw(n - 1)
 
-    @doc "Adds a new node clockwise to current"
-    @spec add_cw(t, any) :: t
-    def add_cw({map, pointer}, value) do
-      current_cw = map |> Map.fetch!(pointer) |> elem(1)
-
-      map =
-        map
-        |> Map.update!(pointer, fn {n, _cw, ccw} -> {n, value, ccw} end)
-        |> Map.update!(current_cw, fn {n, cw, _ccw} -> {n, cw, value} end)
-        |> Map.put(value, {value, current_cw, pointer})
-
-      {map, pointer}
+    def add_cw({left, current, right}, value) do
+      {left, current, [value | right]}
     end
 
-    @doc "Adds a new node counter-clockwise to current"
-    @spec add_ccw(t, any) :: t
-    def add_ccw({map, pointer}, value) do
-      current_ccw = map |> Map.fetch!(pointer) |> elem(2)
-
-      map =
-        map
-        |> Map.update!(pointer, fn {n, cw, _ccw} -> {n, cw, value} end)
-        |> Map.update!(current_ccw, fn {n, _cw, ccw} -> {n, value, ccw} end)
-        |> Map.put(value, {value, pointer, current_ccw})
-
-      {map, pointer}
-    end
-
-    @doc "Removes the current node. The new current becomes the clockwise node of the old current"
-    @spec remove_current(t) :: t
-    def remove_current({map, pointer}) do
-      {^pointer, current_cw, current_ccw} = Map.fetch!(map, pointer)
-
-      map =
-        map
-        |> Map.update!(current_cw, fn {n, cw, _ccw} -> {n, cw, current_ccw} end)
-        |> Map.update!(current_ccw, fn {n, _cw, ccw} -> {n, current_cw, ccw} end)
-        |> Map.delete(pointer)
-
-      {map, current_cw}
+    def remove_current({left, _current, [right_first | right]}) do
+      {left, right_first, right}
     end
   end
 
-  @doc "Part 1"
+  @doc "Part 1 and 2"
   @spec high_score(integer, integer) :: integer
   def high_score(num_players, max_value) do
     circle = Circle.new(0)

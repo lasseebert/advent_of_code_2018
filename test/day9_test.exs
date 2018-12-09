@@ -7,10 +7,11 @@ defmodule Advent.Day9Test do
   describe "Circle" do
     test "common operations" do
       # 3 0 2 1
-      circle = Circle.new(0)
+      circle = Circle.new(3)
       circle = Circle.add_cw(circle, 1)
       circle = Circle.add_cw(circle, 2)
-      circle = Circle.add_ccw(circle, 3)
+      circle = Circle.add_cw(circle, 0)
+      circle = Circle.rotate_cw(circle)
       assert Circle.current(circle) == 0
 
       circle = Circle.rotate_cw(circle)
