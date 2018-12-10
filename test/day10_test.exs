@@ -73,14 +73,37 @@ defmodule Advent.Day10Test do
     end
 
     test "example input" do
-      # IO.puts("")
-      # @example_input |> Day10.render_solution() |> IO.puts()
+      expected = """
+      #   #  ###
+      #   #   # 
+      #   #   # 
+      #####   # 
+      #   #   # 
+      #   #   # 
+      #   #   # 
+      #   #  ###
+      """
+
+      assert @example_input |> Day10.render_solution() == expected
     end
 
     test "puzzle input" do
-      # input = File.read!("inputs/day10_1.txt")
-      # IO.puts("")
-      # input |> Day10.render_solution() |> IO.puts()
+      input = File.read!("inputs/day10_1.txt")
+
+      expected = """
+      #       #    #  #####   #    #  ######  #    #  #    #     ###
+      #       #   #   #    #  #    #       #  #    #  #    #      # 
+      #       #  #    #    #  #    #       #  #    #  #    #      # 
+      #       # #     #    #  #    #      #   #    #  #    #      # 
+      #       ##      #####   ######     #    ######  ######      # 
+      #       ##      #       #    #    #     #    #  #    #      # 
+      #       # #     #       #    #   #      #    #  #    #      # 
+      #       #  #    #       #    #  #       #    #  #    #  #   # 
+      #       #   #   #       #    #  #       #    #  #    #  #   # 
+      ######  #    #  #       #    #  ######  #    #  #    #   ###  
+      """
+
+      assert input |> Day10.render_solution() == expected
     end
   end
 

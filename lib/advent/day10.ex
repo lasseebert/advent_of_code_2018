@@ -156,24 +156,25 @@ defmodule Advent.Day10 do
   @spec render_solution(String.t()) :: String.t()
   def render_solution(input) do
     points = parse(input)
-    current_area = bounding_area(points)
-    {_count, solution_points} = step_to_smallest(points, current_area, 0)
-    print(solution_points)
+    count = steps_to_minimum_area(points)
+
+    points
+    |> step(count)
+    |> print()
   end
 
   @doc "Part 2"
   @spec num_step_to_smallest(String.t()) :: integer
   def num_step_to_smallest(input) do
-    points = parse(input)
-    current_area = bounding_area(points)
-    {count, _points} = step_to_smallest(points, current_area, 0)
-    count
+    input
+    |> parse()
+    |> steps_to_minimum_area()
   end
 
   @doc "Moves all points a second"
   @spec step(points) :: points
-  def step(points) do
-    Enum.map(points, &step_point/1)
+  def step(points, count \\ 1) do
+    Enum.map(points, &step_point(&1, count))
   end
 
   @doc "Returns the bounding box area of all points"
@@ -191,14 +192,38 @@ defmodule Advent.Day10 do
     |> Enum.map(&parse_line/1)
   end
 
-  defp step_to_smallest(points, current_area, count) do
-    next_step = step(points)
+  defp find_upper(points, current_area, next_step_num) do
+    next_step = step(points, next_step_num)
     next_area = bounding_area(next_step)
 
     if next_area > current_area do
-      {count, points}
+      next_step_num
     else
-      step_to_smallest(next_step, next_area, count + 1)
+      find_upper(points, next_area, next_step_num * 2)
+    end
+  end
+
+  defp steps_to_minimum_area(points) do
+    current_area = bounding_area(points)
+    upper_bound = find_upper(points, current_area, 1)
+    steps_to_minimum_area(points, 0, upper_bound)
+  end
+
+  defp steps_to_minimum_area(_points, lower, upper) when lower + 2 == upper do
+    lower + 1
+  end
+
+  defp steps_to_minimum_area(points, lower, upper) do
+    middle = div(lower + upper, 2)
+    next_step_1 = step(points, middle)
+    next_area_1 = bounding_area(next_step_1)
+    next_step_2 = step(points, middle + 1)
+    next_area_2 = bounding_area(next_step_2)
+
+    if next_area_1 < next_area_2 do
+      steps_to_minimum_area(points, lower, middle + 1)
+    else
+      steps_to_minimum_area(points, middle, upper)
     end
   end
 
@@ -214,8 +239,8 @@ defmodule Advent.Day10 do
     |> Enum.join("")
   end
 
-  defp step_point({{px, py}, {vx, vy}}) do
-    {{px + vx, py + vy}, {vx, vy}}
+  defp step_point({{px, py}, {vx, vy}}, n) do
+    {{px + vx * n, py + vy * n}, {vx, vy}}
   end
 
   defp bounding_box(points) do
