@@ -22,4 +22,18 @@ defmodule Advent.Day11Test do
       assert Day11.best_3_square(7803) == {20, 51}
     end
   end
+
+  describe "part 2" do
+    test "example input 1" do
+      assert Day11.best_square(18) == {{90, 269}, 16}
+    end
+
+    test "example input 2" do
+      assert Day11.best_square(42) == {{232, 251}, 12}
+    end
+
+    test "puzzle input" do
+      assert Day11.best_square(7803) == {{230, 272}, 17}
+    end
+  end
 end

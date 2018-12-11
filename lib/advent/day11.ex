@@ -60,23 +60,84 @@ defmodule Advent.Day11 do
   @spec best_3_square(integer) :: point
   def best_3_square(serial) do
     grid = init_grid(serial)
+    cache = grid |> Enum.into(%{}, fn {point, value} -> {{point, 1}, value} end)
     squares = build_squares(3)
 
-    offsets = for dx <- 0..2, dy <- 0..2, do: {dx, dy}
-
     squares
-    |> Enum.map(fn {point, 3} ->
-      value =
-        offsets
-        |> Enum.reduce(0, fn offset, acc ->
-          new_point = add(offset, point)
-          acc + Map.fetch!(grid, new_point)
-        end)
-
-      {point, value}
+    |> Enum.reduce({[], cache}, fn square, {acc, cache} ->
+      {value, cache} = square_value(square, cache)
+      {[{square, value} | acc], cache}
     end)
+    |> elem(0)
     |> Enum.max_by(&elem(&1, 1))
     |> elem(0)
+    |> elem(0)
+  end
+
+  @doc "Part 2"
+  @spec best_square(integer) :: square
+  def best_square(serial) do
+    grid = init_grid(serial)
+    cache = grid |> Enum.into(%{}, fn {point, value} -> {{point, 1}, value} end)
+
+    1..300
+    |> Enum.flat_map(&build_squares/1)
+    |> Enum.reduce({[], cache}, fn square, {acc, cache} ->
+      {value, cache} = square_value(square, cache)
+      {[{square, value} | acc], cache}
+    end)
+    |> elem(0)
+    |> Enum.max_by(&elem(&1, 1))
+    |> elem(0)
+  end
+
+  defp square_value(square, cache) do
+    case Map.fetch(cache, square) do
+      {:ok, value} -> {value, cache}
+      :error -> calc_square_value(square, cache)
+    end
+  end
+
+  defp calc_square_value({{x, y}, n} = square, cache) when rem(n, 2) == 0 do
+    n_half = div(n, 2)
+
+    {value, cache} =
+      [
+        {{x, y}, n_half},
+        {{x + n_half, y}, n_half},
+        {{x, y + n_half}, n_half},
+        {{x + n_half, y + n_half}, n_half}
+      ]
+      |> Enum.reduce({0, cache}, fn smaller_square, {sum, cache} ->
+        {value, cache} = square_value(smaller_square, cache)
+        {value + sum, cache}
+      end)
+
+    cache = Map.put(cache, square, value)
+    {value, cache}
+  end
+
+  defp calc_square_value({{x, y}, n} = square, cache) do
+    n_half_small = div(n, 2)
+    n_half_big = n_half_small + 1
+
+    {value, cache} =
+      [
+        {{x, y}, n_half_big},
+        {{x + n_half_big, y}, n_half_small},
+        {{x, y + n_half_big}, n_half_small},
+        {{x + n_half_small, y + n_half_small}, n_half_big}
+      ]
+      |> Enum.reduce({0, cache}, fn smaller_square, {sum, cache} ->
+        {value, cache} = square_value(smaller_square, cache)
+        {value + sum, cache}
+      end)
+
+    {negative, cache} = square_value({{x + n_half_small, y + n_half_small}, 1}, cache)
+    value = value - negative
+
+    cache = Map.put(cache, square, value)
+    {value, cache}
   end
 
   @doc "Returns the fuel cell value of a single cell"
@@ -87,8 +148,6 @@ defmodule Advent.Day11 do
     power_level = power_level |> div(100) |> rem(10)
     power_level - 5
   end
-
-  defp add({x1, y1}, {x2, y2}), do: {x1 + x2, y1 + y2}
 
   defp init_grid(serial) do
     for x <- 1..300, y <- 1..300 do
