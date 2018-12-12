@@ -69,18 +69,55 @@ defmodule Advent.Day12 do
   @type state :: MapSet.t()
   @type rules :: MapSet.t()
 
-  @doc "Part 1"
-  @spec sum_pots(String.t()) :: integer
-  def sum_pots(input) do
+  @doc "Part 1 and 2"
+  @spec sum_pots(String.t(), integer) :: integer
+  def sum_pots(input, count) do
+    {state, rules} = parse(input)
+
+    {head, repeat, offset} = find_repeat(state, rules, [])
+
+    if count < length(head) do
+      {state, offset} = head |> Enum.at(count)
+      Enum.sum(state) + length(state) * offset
+    else
+      rounds = div(count - length(head), length(repeat))
+        index = rem(count, length(repeat))
+
+      {finish_state, state_offset} = Enum.at(repeat, index)
+      total_offset = offset * rounds + state_offset
+      Enum.sum(finish_state) + total_offset * length(finish_state)
+    end
+  end
+
+  def sum_pots_slow(input, count) do
     {state, rules} = parse(input)
 
     state
-    |> step_many(rules, 20)
+    |> step_many(rules, count)
     |> Enum.sum()
   end
 
   defp step_many(state, _rules, 0), do: state
   defp step_many(state, rules, n) when n > 0, do: state |> step(rules) |> step_many(rules, n - 1)
+
+  defp find_repeat(state, rules, repeat) do
+    offset = Enum.min(state)
+    state_key = state |> Enum.map(&(&1 - offset)) |> Enum.sort()
+
+    if Enum.any?(repeat, fn {key, _offset} -> key == state_key end) do
+      repeat = Enum.reverse(repeat)
+      {_, start_offset} = start = repeat |> Enum.find(repeat, fn {key, _offset} -> key == state_key end)
+      {head, repeat} = Enum.split_while(repeat, fn row -> row != start end)
+      repeat_offset = offset - start_offset
+      {head, repeat, repeat_offset}
+    else
+      repeat = [{state_key, offset} | repeat]
+
+      state
+      |> step(rules)
+      |> find_repeat(rules, repeat)
+    end
+  end
 
   defp step(state, rules) do
     {min, max} = Enum.min_max(state)
