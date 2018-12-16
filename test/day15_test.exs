@@ -98,10 +98,30 @@ defmodule Advent.Day15Test do
       assert Day15.outcome(input) == 18740
     end
 
-    @tag timeout: 600_000
     test "puzzle input" do
       input = File.read!("inputs/day15_1.txt")
       assert Day15.outcome(input) == 195811
+    end
+  end
+
+  describe "part 2" do
+    test "example input 1" do
+      input = """
+      #######
+      #.G...#
+      #...EG#
+      #.#.#G#
+      #..G#E#
+      #.....#
+      #######
+      """
+
+      assert Day15.outcome_elf_win(input) == 4988
+    end
+
+    test "puzzle input" do
+      input = File.read!("inputs/day15_1.txt")
+      assert Day15.outcome_elf_win(input) == 69867
     end
   end
 end
