@@ -108,23 +108,23 @@ defmodule Advent.Day18 do
   defp parse_char("#"), do: :lumber
   defp parse_char("|"), do: :tree
 
-  defp print_map(map) do
-    IO.puts("")
+  # defp print_map(map) do
+  #  IO.puts("")
 
-    map
-    |> Enum.sort_by(fn {{x, y}, _} -> {y, x} end)
-    |> Enum.chunk_by(fn {{_x, y}, _} -> y end)
-    |> Enum.map(fn line ->
-      line
-      |> Enum.map(fn {_point, acre} -> acre end)
-      |> Enum.map(fn
-        :tree -> "|"
-        :lumber -> "#"
-        :open -> "."
-      end)
-      |> Enum.join("")
-    end)
-    |> Enum.join("\n")
-    |> IO.puts()
-  end
+  #  map
+  #  |> Enum.sort_by(fn {{x, y}, _} -> {y, x} end)
+  #  |> Enum.chunk_by(fn {{_x, y}, _} -> y end)
+  #  |> Enum.map(fn line ->
+  #    line
+  #    |> Enum.map(fn {_point, acre} -> acre end)
+  #    |> Enum.map(fn
+  #      :tree -> "|"
+  #      :lumber -> "#"
+  #      :open -> "."
+  #    end)
+  #    |> Enum.join("")
+  #  end)
+  #  |> Enum.join("\n")
+  #  |> IO.puts()
+  # end
 end
