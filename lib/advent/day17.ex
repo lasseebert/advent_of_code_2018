@@ -178,32 +178,32 @@ defmodule Advent.Day17 do
   defp parse_var("x"), do: :x
   defp parse_var("y"), do: :y
 
-  defp print_area(map, {mid_x, mid_y}) do
-    margin = 30
+  # defp print_area(map, {mid_x, mid_y}) do
+  #  margin = 30
 
-    printed_map =
-      (mid_y - margin)..(mid_y + margin)
-      |> Enum.map(fn y ->
-        (mid_x - margin)..(mid_x + margin)
-        |> Enum.map(fn x ->
-          if {x, y} == {mid_x, mid_y} do
-            "X"
-          else
-            map
-            |> get_map_value({x, y})
-            |> case do
-              :dry_sand -> " "
-              :clay -> "#"
-              :wet_sand -> "|"
-              :water -> "~"
-            end
-          end
-        end)
-        |> Enum.join("")
-      end)
-      |> Enum.join("\n")
+  #  printed_map =
+  #    (mid_y - margin)..(mid_y + margin)
+  #    |> Enum.map(fn y ->
+  #      (mid_x - margin)..(mid_x + margin)
+  #      |> Enum.map(fn x ->
+  #        if {x, y} == {mid_x, mid_y} do
+  #          "X"
+  #        else
+  #          map
+  #          |> get_map_value({x, y})
+  #          |> case do
+  #            :dry_sand -> " "
+  #            :clay -> "#"
+  #            :wet_sand -> "|"
+  #            :water -> "~"
+  #          end
+  #        end
+  #      end)
+  #      |> Enum.join("")
+  #    end)
+  #    |> Enum.join("\n")
 
-    IO.puts("\n===========================\nPrinted map at {#{mid_x}, #{mid_y}}:\n" <> printed_map)
-    map
-  end
+  #  IO.puts("\n===========================\nPrinted map at {#{mid_x}, #{mid_y}}:\n" <> printed_map)
+  #  map
+  # end
 end
