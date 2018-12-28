@@ -22,7 +22,8 @@ defmodule Advent.MixProject do
   defp deps do
     [
       {:credo, "~> 1.0", only: [:dev], runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:heapq, "~> 0.0"}
     ]
   end
 end
